@@ -48,7 +48,7 @@ void draw(){
     stroke(92, 75, 5);
     smooth();
     
-    int num_crysts = 3;
+    int num_crysts = 9;
     rotate(radians(60));
     scale(1);
     
@@ -59,7 +59,7 @@ void draw(){
       pushMatrix();
         int num_wings = 5;
         float wing_size = 0.1;
-        float wing_rotation = radians((float) 90 / 5);
+        float wing_rotation = radians((float) 90 / num_wings);
         translate(0, -100);
         
         for (int j = 0; j < num_wings; j++) {
@@ -71,8 +71,8 @@ void draw(){
         
           // right side
           pushMatrix();
-            rotate(wing_rotation * j);
-            scale(1 + (wing_size * j));
+            rotate(wing_rotation * (num_wings - 1 - j));
+            scale(1 + (wing_size * (num_wings - 1 - j)));
             
             fill(light_yellow);
             beginShape();
@@ -91,8 +91,8 @@ void draw(){
           
           // left side
           pushMatrix();
-            rotate(-wing_rotation * j);
-            scale(1 + (wing_size * j));
+            rotate(-wing_rotation * (num_wings - 1 - j));
+            scale(1 + (wing_size * (num_wings - 1 - j)));
             
             fill(light_yellow);
             beginShape();
@@ -132,12 +132,66 @@ void draw(){
     int prism_y2 = prism_y1 + 110;
     int prism_y3 = prism_y2 + 20;
     
-    int num_prisms = 3;
+    int num_prisms = 9;
     for(int i = 0; i < num_prisms; i++) {
       rotate(radians(360 / num_prisms));
       
       // wings
+      pushMatrix();
+        int num_wings = 5;
+        float wing_size = 0.1;
+        float wing_rotation = radians((float) 90 / num_wings);
+        translate(0, -100);
+        
+        for (int j = 0; j < num_wings; j++) {
+          int wing_y1 = -65;
+          int wing_x2 = 35;
+          int wing_y2 = wing_y1 - 15;
+          int wing_y3 = wing_y1 + 65;
+          int wing_ymid = wing_y1 + 20;
+        
+          // right side
+          pushMatrix();
+            rotate(wing_rotation * (num_wings - 1 - j));
+            scale(1 + (wing_size * (num_wings - 1 - j)));
+            
+            fill(light_yellow);
+            beginShape();
+              vertex(0, wing_y1);
+              vertex(wing_x2, wing_y2);
+              vertex(0, wing_y3);
+            endShape();
+          
+            fill(yellow_shadow);
+            beginShape();
+              vertex(0, wing_y1);
+              vertex(wing_x2 - 2, wing_y2 + 1);
+              vertex(0, wing_ymid);
+            endShape();
+          popMatrix();
+          
+          // left side
+          pushMatrix();
+            rotate(-wing_rotation * (num_wings - 1 - j));
+            scale(1 + (wing_size * (num_wings - 1 - j)));
+            
+            fill(light_yellow);
+            beginShape();
+              vertex(0, wing_y1);
+              vertex(-wing_x2, wing_y2);
+              vertex(0, wing_y3);
+            endShape();
+            
+            fill(yellow_shadow);
+            beginShape();
+              vertex(0, wing_y1);
+              vertex(-(wing_x2 - 2), wing_y2 + 1);
+              vertex(0, wing_ymid);
+            endShape();
+          popMatrix();
+        }
       
+      popMatrix();
       
       // prism
       fill(light_yellow);
@@ -174,7 +228,7 @@ void draw(){
       endShape();
       
       // ball
-      int ball_d = 15;
+      int ball_d = 20;
       
       fill(light_yellow);
       ellipse(0, prism_y1 - 25, ball_d, ball_d);
