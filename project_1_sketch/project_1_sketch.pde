@@ -56,25 +56,61 @@ void draw(){
       rotate(radians(360 / num_crysts));
       
       // wings
-      int wing_y1 = -170;
-      int wing_x2 = 35;
-      int wing_y2 = wing_y1 - 10;
-      int wing_y3 = wing_y1 + 80;
+      pushMatrix();
+        int num_wings = 5;
+        float wing_size = 0.1;
+        float wing_rotation = radians((float) 90 / 5);
+        translate(0, -100);
+        
+        for (int j = 0; j < num_wings; j++) {
+          int wing_y1 = -65;
+          int wing_x2 = 35;
+          int wing_y2 = wing_y1 - 15;
+          int wing_y3 = wing_y1 + 65;
+          int wing_ymid = wing_y1 + 20;
+        
+          // right side
+          pushMatrix();
+            rotate(wing_rotation * j);
+            scale(1 + (wing_size * j));
+            
+            fill(light_yellow);
+            beginShape();
+              vertex(0, wing_y1);
+              vertex(wing_x2, wing_y2);
+              vertex(0, wing_y3);
+            endShape();
+          
+            fill(yellow_shadow);
+            beginShape();
+              vertex(0, wing_y1);
+              vertex(wing_x2 - 2, wing_y2 + 1);
+              vertex(0, wing_ymid);
+            endShape();
+          popMatrix();
+          
+          // left side
+          pushMatrix();
+            rotate(-wing_rotation * j);
+            scale(1 + (wing_size * j));
+            
+            fill(light_yellow);
+            beginShape();
+              vertex(0, wing_y1);
+              vertex(-wing_x2, wing_y2);
+              vertex(0, wing_y3);
+            endShape();
+            
+            fill(yellow_shadow);
+            beginShape();
+              vertex(0, wing_y1);
+              vertex(-(wing_x2 - 2), wing_y2 + 1);
+              vertex(0, wing_ymid);
+            endShape();
+          popMatrix();
+        }
       
-      fill(light_yellow);
-      beginShape();
-        vertex(0, wing_y1);
-        vertex(wing_x2, wing_y2);
-        vertex(0, wing_y3);
-      endShape();
-      
-      int wing_ymid = wing_y1 + 10;
-      fill(light_yellow);
-      beginShape();
-        vertex(0, wing_y1);
-        vertex(wing_x2, wing_y2);
-        vertex(0, wing_ymid);
-      endShape();
+      popMatrix();
       
       // crystal
       fill(yellow_shadow);
