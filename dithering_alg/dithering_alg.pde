@@ -23,7 +23,7 @@ color secondaryColor;
 
 // Image
 PImage img;
-String imagePath = "test.png";
+String imagePath = "test-3.png";
 
 // #############################################################################
 // Setup
