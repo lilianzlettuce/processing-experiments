@@ -42,7 +42,7 @@ void draw(){
     int crys_x2 = 20;
     int crys_y2 = crys_y1 + 30;
     int crys_y_mid = crys_y2 + 15;
-    int crys_y3 = crys_y1 + 130;
+    int crys_y3 = crys_y1 + 160;
     
     strokeWeight(2);
     stroke(92, 75, 5);
@@ -50,10 +50,33 @@ void draw(){
     
     int num_crysts = 3;
     rotate(radians(60));
-    scale(0.8);
+    scale(1);
     
     for(int i = 0; i < num_crysts; i++) {
       rotate(radians(360 / num_crysts));
+      
+      // wings
+      int wing_y1 = -170;
+      int wing_x2 = 35;
+      int wing_y2 = wing_y1 - 10;
+      int wing_y3 = wing_y1 + 80;
+      
+      fill(light_yellow);
+      beginShape();
+        vertex(0, wing_y1);
+        vertex(wing_x2, wing_y2);
+        vertex(0, wing_y3);
+      endShape();
+      
+      int wing_ymid = wing_y1 + 10;
+      fill(light_yellow);
+      beginShape();
+        vertex(0, wing_y1);
+        vertex(wing_x2, wing_y2);
+        vertex(0, wing_ymid);
+      endShape();
+      
+      // crystal
       fill(yellow_shadow);
       quad(0, crys_y1, crys_x2, crys_y2, 0, crys_y3, -crys_x2, crys_y2);
       fill(light_yellow);
@@ -75,8 +98,12 @@ void draw(){
     
     int num_prisms = 3;
     for(int i = 0; i < num_prisms; i++) {
-      // prism
       rotate(radians(360 / num_prisms));
+      
+      // wings
+      
+      
+      // prism
       fill(light_yellow);
       quad(0, prism_y1, prism_x2, prism_y2, 0, prism_y3, -prism_x2, prism_y2);
       line(0, prism_y1, 0, prism_y3);
@@ -109,19 +136,6 @@ void draw(){
         
         vertex(t_big_x1, t_big_y1);
       endShape();
-      
-      /*int t_x1 = 10;
-      int t_y1 = prism_y1 + 25;
-      int t_big_cpx = t_x1 + 20;
-      int t_big_cpy1 = t_y1 + 5;
-      int t_big_cpy2 = t_y1 + 20;
-      
-      noFill();
-      beginShape();
-        vertex(t_x1, t_y1);
-        bezierVertex(t_big_cpx, t_big_cpy1, t_big_cpx, t_big_cpy2, 0, t_big_cpy2);
-        bezierVertex(-t_big_cpx, t_big_cpy2, -t_big_cpx, t_big_cpy1, -t_x1, t_y1);
-      endShape();*/
       
       // ball
       int ball_d = 15;
