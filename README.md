@@ -1,2 +1,2 @@
 # processing-experiments 
-abstract compositions created using processing 
+playing around with making abstract compositions with processing 
