@@ -1,7 +1,7 @@
 import processing.pdf.*;
 
 void setup(){
-  // size(600,600, PDF, "test.pdf");
+   size(600,600, PDF, "project-1.pdf");
   size(600,600);
 }
 
@@ -132,7 +132,7 @@ void draw(){
     int prism_y2 = prism_y1 + 110;
     int prism_y3 = prism_y2 + 20;
     
-    int num_prisms = 9;
+    int num_prisms = 3;
     for(int i = 0; i < num_prisms; i++) {
       rotate(radians(360 / num_prisms));
       
@@ -261,5 +261,5 @@ void draw(){
     ellipse(0, 0, pupil_w, pupil_w);
   popMatrix();
   
-  //exit();
+  exit();
 }
