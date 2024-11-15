@@ -1,7 +1,7 @@
 import processing.pdf.*;
 
 void setup(){
-   size(600,600, PDF, "project-1.pdf");
+  size(600,600, PDF, "project-1.pdf");
   size(600,600);
 }
 
