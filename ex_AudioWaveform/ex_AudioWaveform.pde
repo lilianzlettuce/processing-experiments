@@ -66,20 +66,35 @@ public void draw() {
   strokeWeight(2);
   noFill();*/
   
-  
-  if (0 < port.available()) {  // If data is available to read,
-    val = port.read();            // read it and store it in val
-    /*String valString = port.readStringUntil('\n');  // Read a line of text
-    if (valString != null) {               // Check if a valid line was read
-      valString = trim(valString);         // Remove any extraneous whitespace
-      val = int(valString);                // Convert string to integer
-    }*/
+  // Check if data is available
+  if (port.available()> 0) {
+    // Read and store in val
+    //val = port.read(); 
     
-    float speed = map(val, 0, 255, 0.1, 3);
+    // Read a line of text and check if valid
+    String lineRead = port.readStringUntil('\n');
+    if (lineRead != null) {
+      lineRead = trim(lineRead); // remove whitespace
+      
+      // Check to see what this value should be used for
+      if (lineRead.length() > 4 && lineRead.substring(0, 4).equals("RATE")) {
+        // Convert value to integer
+        val = int(lineRead.substring(4));
+      
+        // Update speed of sample sound
+        float speed = map(val, 0, 255, 0.1, 3);
+        sample.rate(speed);
+        println(speed);
+      } else {
+        numLines = int(map(val, 0, 255, 1, 100));
+      }
+    }
+    
+    /*float speed = map(val, 0, 255, 0.1, 3);
     sample.rate(speed);
     println(speed);
     
-    numLines = int(map(val, 0, 255, 1, 100));
+    numLines = int(map(val, 0, 255, 1, 100));*/
   }
   //println(val);
   
