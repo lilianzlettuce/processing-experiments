@@ -3,6 +3,7 @@ import processing.sound.*;
 
 Serial port;
 int val;
+int numLines = 80;
 
 // Declare the sound source and Waveform analyzer variables
 SoundFile sample;
@@ -34,6 +35,7 @@ public void setup() {
   sample2 = new SoundFile(this, "warp_machine.wav");
   sample.loop();
   sample2.loop();
+  //sample2.amp(0.7);
   
   noise = new WhiteNoise(this);
   noise.play(0.2);
@@ -72,13 +74,14 @@ public void draw() {
       valString = trim(valString);         // Remove any extraneous whitespace
       val = int(valString);                // Convert string to integer
     }*/
+    
+    float speed = map(val, 0, 255, 0.1, 3);
+    sample.rate(speed);
+    println(speed);
+    
+    numLines = int(map(val, 0, 255, 1, 100));
   }
   //println(val);
-  
-  float speed = map(val, 0, 255, 0.1, 3);
-  sample.rate(speed);
-  println(speed);
-  
   
   
   // Map the left/right mouse position to a cutoff frequency between 20 and 10000 Hz
@@ -98,11 +101,12 @@ public void draw() {
   // Perform the analysis
   waveform.analyze();
   
-  /*color c = color(random(0, 256), random(0, 256), random(0, 256));
+  color c = color(random(0, 256), random(0, 256), random(0, 256));
+  /*
   stroke(c);
   fill(c);*/
   
-  beginShape();
+  /*beginShape();
   for(int i = 0; i < samples; i++){
     // Draw current data of the waveform
     // Each sample in the data array is between -1 and +1 
@@ -110,11 +114,40 @@ public void draw() {
     /*vertex(
       map(i, 0, samples, 0, width),
       map(waveform.data[i], -0.7, 0.7, 0, height)
-    );*/
+    );
     vertex(
       map(waveform.data[i], -0.5, 0.5, 0, width),
       map(i, 0, samples, 0, height)
     );
   }
-  endShape();
+  endShape();*/
+  
+  translate(width/2, 0);
+  
+  for (int i = 0; i < numLines; i++) {
+    //stroke(c);
+    strokeWeight(2);
+    beginShape();
+    for(int j = 0; j < samples; j++){
+      /*vertex(
+        map(j, 0, samples, 0, width),
+        map(waveform.data[j], -0.5, 0.5, 0, height) - height / 2 + map(i, 0, numLines, 0, height)
+      );*/
+      vertex(
+        map(waveform.data[j], -0.5, 0.5, 0, width) - width + map(i, 0, numLines, 0, width) + j,// + random(0, 1),
+        map(j, 0, samples, 0, height) //+ random(0, 50)
+      );
+    }
+    rotate(PI / mouseY);
+    endShape();
+    
+    /*beginShape();
+    for(int j = 0; j < samples; j++){
+      vertex(
+        map(j, 0, samples, 0, width),
+        map(waveform.data[j], -0.5, 0.5, 0, height) - height / 2 + map(i, 0, numLines, 0, height)
+      );
+    }
+    endShape();*/
+  }
 }
