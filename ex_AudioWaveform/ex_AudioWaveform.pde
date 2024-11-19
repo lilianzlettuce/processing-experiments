@@ -3,6 +3,7 @@ import processing.sound.*;
 
 Serial port;
 int val;
+float rotationFactor = 0.098;
 int numLines = 80;
 
 // Declare the sound source and Waveform analyzer variables
@@ -17,17 +18,14 @@ BandPass filter;
 int samples = 100;
 
 public void setup() {
-  size(1000, 600);
+  fullScreen();
+  //size(1000, 600);
   
   // Set background color, noFill and stroke style
   background(0);
   stroke(255, 0, 0);
   strokeWeight(2);
   fill(0);
-  
-  /*background(255, 0, 0);
-  stroke(0);
-  noFill();*/
 
   // Load and play a soundfile and loop it.
   sample = new SoundFile(this, "beat.aiff");
@@ -45,9 +43,8 @@ public void setup() {
   filter.process(sample2);
   filter.process(noise);
 
-  // Create the Waveform analyzer and connect the playing soundfile to it.
+  // Create the Waveform analyzer and connect audio in
   waveform = new Waveform(this, samples);
-  //waveform.input(sample);
   waveform.input(new AudioIn(this, 0));
   
   // Open the port that the board is connected to and use the same speed (9600 bps)
@@ -66,11 +63,11 @@ public void draw() {
   strokeWeight(2);
   noFill();*/
   
+  // Hide cursor
+  noCursor();
+  
   // Check if data is available
   if (port.available()> 0) {
-    // Read and store in val
-    //val = port.read(); 
-    
     // Read a line of text and check if valid
     String lineRead = port.readStringUntil('\n');
     if (lineRead != null) {
@@ -84,9 +81,14 @@ public void draw() {
         // Update speed of sample sound
         float speed = map(val, 0, 255, 0.1, 3);
         sample.rate(speed);
-        println(speed);
-      } else {
-        numLines = int(map(val, 0, 255, 1, 100));
+        //println(speed);
+      } else if (lineRead.length() > 3 && lineRead.substring(0, 3).equals("ROT")) {
+        // Convert value to integer
+        val = int(lineRead.substring(3));
+        
+        //numLines = int(map(val, 0, 255, 1, 100));
+        rotationFactor = map(val, 0, 255, 0, 1);
+        println(rotationFactor);
       }
     }
     
@@ -153,7 +155,14 @@ public void draw() {
         map(j, 0, samples, 0, height) //+ random(0, 50)
       );
     }
-    rotate(PI / mouseY);
+    /*println("mult");
+    println(PI * map(mouseY, 0, height, 0, 1));
+    println("div");
+    println(PI / mouseY);*/
+    
+    // Rotate
+    //rotate(PI * map(mouseY, 0, height, 0, 1));// / mouseY);
+    rotate(PI * rotationFactor);
     endShape();
     
     /*beginShape();
