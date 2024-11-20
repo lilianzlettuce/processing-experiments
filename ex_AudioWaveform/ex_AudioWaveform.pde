@@ -3,7 +3,7 @@ import processing.sound.*;
 
 Serial port;
 int val;
-float rotationFactor = 0.098;
+float rotationFactor;
 int numLines = 80;
 
 // Declare the sound source and Waveform analyzer variables
@@ -31,12 +31,12 @@ public void setup() {
   sample = new SoundFile(this, "beat.aiff");
   sample = new SoundFile(this, "heavenly.wav");
   sample2 = new SoundFile(this, "warp_machine.wav");
-  sample.loop();
-  sample2.loop();
+  //sample.loop();
+  //sample2.loop();
   //sample2.amp(0.7);
   
   noise = new WhiteNoise(this);
-  noise.play(0.2);
+  //noise.play(0.2);
   
   filter = new BandPass(this);
   filter.process(sample);
@@ -46,6 +46,10 @@ public void setup() {
   // Create the Waveform analyzer and connect audio in
   waveform = new Waveform(this, samples);
   waveform.input(new AudioIn(this, 0));
+  
+  // Keeping some cool rotations
+  rotationFactor = 0.5058824;
+  rotationFactor = 0.098;
   
   // Open the port that the board is connected to and use the same speed (9600 bps)
   //port = new Serial(this, 9600);  // Comment this line if it's not the correct port
@@ -87,7 +91,8 @@ public void draw() {
         val = int(lineRead.substring(3));
         
         //numLines = int(map(val, 0, 255, 1, 100));
-        rotationFactor = map(val, 0, 255, 0, 1);
+        rotationFactor = map(val, 0, 255, 0, 1); // potentiometer
+        //rotationFactor = map(val, 0, 20, 0, 1); // light sensor (hacky for now)
         println(rotationFactor);
       }
     }
@@ -109,11 +114,12 @@ public void draw() {
   filter.freq(frequency);
   filter.bw(bandwidth);
   
-  /*if (mouseX > width / 2) {
-    stroke(0);
+  // Change stroke color depending on mouse position
+  if (mouseX > width / 2) {
+    stroke(255, 255, 255);
   } else {
     stroke(255, 0, 0);
-  }*/
+  }
 
   // Perform the analysis
   waveform.analyze();
@@ -155,16 +161,13 @@ public void draw() {
         map(j, 0, samples, 0, height) //+ random(0, 50)
       );
     }
-    /*println("mult");
-    println(PI * map(mouseY, 0, height, 0, 1));
-    println("div");
-    println(PI / mouseY);*/
     
-    // Rotate
+    // Rotate around origin
     //rotate(PI * map(mouseY, 0, height, 0, 1));// / mouseY);
     rotate(PI * rotationFactor);
     endShape();
     
+    // Add perpendicular set of lines
     /*beginShape();
     for(int j = 0; j < samples; j++){
       vertex(
