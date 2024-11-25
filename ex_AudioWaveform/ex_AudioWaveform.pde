@@ -4,7 +4,7 @@ import processing.sound.*;
 Serial port;
 int val;
 float rotationFactor;
-int numLines = 80;
+int numLines = 100;
 
 // Declare the sound source and Waveform analyzer variables
 SoundFile sample;
@@ -49,6 +49,7 @@ public void setup() {
   
   // Keeping some cool rotations
   rotationFactor = 0.5058824;
+  rotationFactor = 0.98039216;
   rotationFactor = 0.098;
   
   // Open the port that the board is connected to and use the same speed (9600 bps)
@@ -115,11 +116,11 @@ public void draw() {
   filter.bw(bandwidth);
   
   // Change stroke color depending on mouse position
-  if (mouseX > width / 2) {
+  /*if (mouseX > width / 2) {
     stroke(255, 255, 255);
   } else {
     stroke(255, 0, 0);
-  }
+  }*/
 
   // Perform the analysis
   waveform.analyze();
