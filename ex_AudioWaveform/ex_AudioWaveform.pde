@@ -15,7 +15,7 @@ WhiteNoise noise;
 BandPass filter;
 
 // Define how many samples of the Waveform you want to be able to read at once
-int samples = 80;
+int samples = 100;
 
 public void setup() {
   fullScreen();
@@ -86,36 +86,34 @@ public void draw() {
         // Check value ID
         String id = lineRead.substring(0, 5);
         switch(id) {
-          case "AVAL0": {
-            // ROT
-            // Convert value to integer
-            val = int(lineRead.substring(6));
+          /*case "AVAL0": {
+            // Update number of samples read from waveform
+            samples = int(map(val, 0, 255, 10, 160));
+            // Create the Waveform analyzer and connect audio in
+            waveform = new Waveform(this, samples);
+            waveform.input(new AudioIn(this, 0));
             
-            //numLines = int(map(val, 0, 255, 1, 100));
-            rotationFactor = map(val, 0, 255, 0, 1); // potentiometer
-            //rotationFactor = map(val, 0, 20, 0, 1); // light sensor (hacky for now)
-            println(rotationFactor);
-            
-            
-            // RATE
-            // Update speed of sample sound
-            float speed = map(val, 0, 255, 0.1, 3);
-            sample.rate(speed);
-            println(speed);
+            println("samples" + samples);
             break;
-          }
+          }*/
           case "AVAL1" : {
             numLines = int(map(val, 0, 255, 1, 100));
+            println("numlines: " + numLines);
             break;
           }
           case "AVAL2" : {
             // ROT
             rotationFactor = map(val, 0, 255, 0, 1); // potentiometer
             //rotationFactor = map(val, 0, 20, 0, 1); // light sensor (hacky for now)
-            println(rotationFactor);
+            println("ROT" + rotationFactor);
             break;
           }
           case "AVAL3" : {
+            // RATE
+            // Update speed of sample sound
+            float speed = map(val, 0, 255, 0.1, 3);
+            sample.rate(speed);
+            //println(speed);
             break;
           }
           default : {
