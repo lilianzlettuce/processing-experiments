@@ -4,7 +4,7 @@ import processing.sound.*;
 Serial port;
 int val;
 float rotationFactor;
-int numLines = 100;
+int numLines = 80;
 
 // Declare the sound source and Waveform analyzer variables
 SoundFile sample;
@@ -15,7 +15,7 @@ WhiteNoise noise;
 BandPass filter;
 
 // Define how many samples of the Waveform you want to be able to read at once
-int samples = 100;
+int samples = 80;
 
 public void setup() {
   fullScreen();
@@ -79,22 +79,49 @@ public void draw() {
       lineRead = trim(lineRead); // remove whitespace
       
       // Check to see what this value should be used for
-      if (lineRead.length() > 4 && lineRead.substring(0, 4).equals("RATE")) {
+      if (lineRead.length() > 5) {
         // Convert value to integer
-        val = int(lineRead.substring(4));
-      
-        // Update speed of sample sound
-        float speed = map(val, 0, 255, 0.1, 3);
-        sample.rate(speed);
-        //println(speed);
-      } else if (lineRead.length() > 3 && lineRead.substring(0, 3).equals("ROT")) {
-        // Convert value to integer
-        val = int(lineRead.substring(3));
+        val = int(lineRead.substring(6));
         
-        //numLines = int(map(val, 0, 255, 1, 100));
-        rotationFactor = map(val, 0, 255, 0, 1); // potentiometer
-        //rotationFactor = map(val, 0, 20, 0, 1); // light sensor (hacky for now)
-        println(rotationFactor);
+        // Check value ID
+        String id = lineRead.substring(0, 5);
+        switch(id) {
+          case "AVAL0": {
+            // ROT
+            // Convert value to integer
+            val = int(lineRead.substring(6));
+            
+            //numLines = int(map(val, 0, 255, 1, 100));
+            rotationFactor = map(val, 0, 255, 0, 1); // potentiometer
+            //rotationFactor = map(val, 0, 20, 0, 1); // light sensor (hacky for now)
+            println(rotationFactor);
+            
+            
+            // RATE
+            // Update speed of sample sound
+            float speed = map(val, 0, 255, 0.1, 3);
+            sample.rate(speed);
+            println(speed);
+            break;
+          }
+          case "AVAL1" : {
+            numLines = int(map(val, 0, 255, 1, 100));
+            break;
+          }
+          case "AVAL2" : {
+            // ROT
+            rotationFactor = map(val, 0, 255, 0, 1); // potentiometer
+            //rotationFactor = map(val, 0, 20, 0, 1); // light sensor (hacky for now)
+            println(rotationFactor);
+            break;
+          }
+          case "AVAL3" : {
+            break;
+          }
+          default : {
+            break;
+          }
+        }
       }
     }
     
