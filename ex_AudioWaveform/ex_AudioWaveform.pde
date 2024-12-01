@@ -4,6 +4,8 @@ import processing.sound.*;
 Serial port;
 int val;
 float rotationFactor;
+float rotationFactor2 = 0;
+int translateY = 0;
 int numLines = 80; //80
 
 // Declare the sound source and Waveform analyzer variables
@@ -21,8 +23,6 @@ int step = 1; // for downsampling
 public void setup() {
   fullScreen();
   //size(1000, 600, P2D);
-  
-  frameRate(30);
   
   // Set background color, noFill and stroke style
   background(0);
@@ -64,10 +64,20 @@ public void setup() {
 public void draw() {
   long start = millis();
   
-  // Reset canvas
-  /*background(0);
-  strokeWeight(2);
-  noFill();*/
+  /*pushMatrix();
+  translate(130, height/2, 0);
+  rotateY(1.25);
+  rotateX(-0.4);
+  noFill();
+  box(100);
+  popMatrix();
+  
+  pushMatrix();
+  translate(500, height*0.35, -200);
+  noFill();
+  stroke(255);
+  sphere(280);
+  popMatrix();*/
   
   // Hide cursor
   noCursor();
@@ -88,19 +98,46 @@ public void draw() {
         String id = lineRead.substring(0, 5);
         switch(id) {
           case "AVAL0": {
-            
+            if (val < 200) {
+              fill(255, 0, 0);
+              stroke(0);
+            } else {
+              fill(0);
+              stroke(255, 0, 0);
+            }
             break;
           }
           case "AVAL1" : {
-            /*numLines = int(map(val, 0, 255, 1, 100));
-            println("numlines: " + numLines);*/
-            
             // Update number of samples used from waveform
             step = val / 8 + 1;
             break;
           }
           case "AVAL2" : {
-            if (val > 128) {
+            // Adjust vertical position
+            if (val > 85) {
+              translateY = height / 2;
+            } else {
+              translateY = 0;
+            }
+            
+            //rotationFactor2 = map(val, 0, 255, 0.05, 1); // potentiometer
+            break;
+          }
+          case "AVAL3" : {
+            // ROT
+            rotationFactor = map(val, 0, 255, 0.05, 1); // potentiometer
+            //rotationFactor = map(val, 0, 20, 0, 1); // light sensor (hacky for now)
+            //println("ROT" + rotationFactor);
+            
+            // RATE
+            // Update speed of sample sound
+            float speed = map(val, 0, 255, 0.1, 3);
+            sample.rate(speed);
+            //println(speed);
+            break;
+          }
+          case "SVAL0" : {
+            if (val == 0) {
               // Reset canvas
               background(0);
               strokeWeight(2);
@@ -108,19 +145,6 @@ public void draw() {
             } else {
               fill(0);
             }
-            break;
-          }
-          case "AVAL3" : {
-            // ROT
-            rotationFactor = map(val, 0, 255, 0, 1); // potentiometer
-            //rotationFactor = map(val, 0, 20, 0, 1); // light sensor (hacky for now)
-            println("ROT" + rotationFactor);
-            
-            // RATE
-            // Update speed of sample sound
-            float speed = map(val, 0, 255, 0.1, 3);
-            sample.rate(speed);
-            //println(speed);
             break;
           }
           default : {
@@ -152,7 +176,9 @@ public void draw() {
   // Perform the analysis
   waveform.analyze();
   
-  translate(width/2, 0);
+  // Translate entire drawing
+  translate(width/2, translateY);
+  //rotate(PI * rotationFactor2);
   
   long drawingStart = millis();
   
@@ -171,10 +197,13 @@ public void draw() {
       vertex(
         map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
         map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
+        //i
       );
     }
     
     // Rotate around origin
+    //rotateX(PI * rotationFactor);
+    //rotateY(PI * rotationFactor);
     rotate(PI * rotationFactor);
     endShape();
   }
