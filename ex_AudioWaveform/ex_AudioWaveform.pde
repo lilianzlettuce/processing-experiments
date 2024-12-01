@@ -22,6 +22,8 @@ public void setup() {
   fullScreen();
   //size(1000, 600, P2D);
   
+  frameRate(30);
+  
   // Set background color, noFill and stroke style
   background(0);
   stroke(255, 0, 0);
