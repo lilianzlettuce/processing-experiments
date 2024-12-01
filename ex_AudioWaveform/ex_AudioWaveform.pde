@@ -15,7 +15,7 @@ WhiteNoise noise;
 BandPass filter;
 
 // Define how many samples of the Waveform you want to be able to read at once
-int samples = 100;
+int samples = 70;
 
 public void setup() {
   fullScreen();
@@ -62,6 +62,8 @@ public void setup() {
 }
 
 public void draw() {
+  long start = millis();
+  
   // Reset canvas
   /*background(0);
   stroke(255);
@@ -75,70 +77,62 @@ public void draw() {
   if (port.available()> 0) {
     // Read a line of text and check if valid
     String lineRead = port.readStringUntil('\n');
-    if (lineRead != null) {
+    if (lineRead != null && lineRead.length() > 6) {
       lineRead = trim(lineRead); // remove whitespace
       
-      // Check to see what this value should be used for
-      if (lineRead.length() > 5) {
-        // Convert value to integer
-        val = int(lineRead.substring(6));
-        
-        // Check value ID
-        String id = lineRead.substring(0, 5);
-        switch(id) {
-          /*case "AVAL0": {
-            // Update number of samples read from waveform
-            samples = int(map(val, 0, 255, 10, 160));
-            // Create the Waveform analyzer and connect audio in
-            waveform = new Waveform(this, samples);
-            waveform.input(new AudioIn(this, 0));
-            
-            println("samples" + samples);
-            break;
-          }*/
-          case "AVAL1" : {
-            numLines = int(map(val, 0, 255, 1, 100));
-            println("numlines: " + numLines);
-            break;
-          }
-          case "AVAL2" : {
-            // ROT
-            rotationFactor = map(val, 0, 255, 0, 1); // potentiometer
-            //rotationFactor = map(val, 0, 20, 0, 1); // light sensor (hacky for now)
-            println("ROT" + rotationFactor);
-            break;
-          }
-          case "AVAL3" : {
-            // RATE
-            // Update speed of sample sound
-            float speed = map(val, 0, 255, 0.1, 3);
-            sample.rate(speed);
-            //println(speed);
-            break;
-          }
-          default : {
-            break;
-          }
+      // Convert value to integer
+      val = int(lineRead.substring(6));
+      
+      // Check value ID
+      String id = lineRead.substring(0, 5);
+      switch(id) {
+        case "AVAL0": {
+          // Update number of samples read from waveform
+          /*samples = int(map(val, 0, 255, 10, 120));
+          // Create the Waveform analyzer and connect audio in
+          waveform = new Waveform(this, samples);
+          waveform.input(new AudioIn(this, 0));
+          
+          println("samples" + samples);*/
+          break;
+        }
+        case "AVAL1" : {
+          /*numLines = int(map(val, 0, 255, 1, 100));
+          println("numlines: " + numLines);*/
+          break;
+        }
+        case "AVAL2" : {
+          // ROT
+          rotationFactor = map(val, 0, 255, 0, 1); // potentiometer
+          //rotationFactor = map(val, 0, 20, 0, 1); // light sensor (hacky for now)
+          println("ROT" + rotationFactor);
+          break;
+        }
+        case "AVAL3" : {
+          // RATE
+          // Update speed of sample sound
+          float speed = map(val, 0, 255, 0.1, 3);
+          sample.rate(speed);
+          //println(speed);
+          break;
+        }
+        default : {
+          break;
         }
       }
     }
-    
-    /*float speed = map(val, 0, 255, 0.1, 3);
-    sample.rate(speed);
-    println(speed);
-    
-    numLines = int(map(val, 0, 255, 1, 100));*/
   }
-  //println(val);
+  
+  println("Serial reading took: " + (millis() - start) + "ms");
   
   
   // Map the left/right mouse position to a cutoff frequency between 20 and 10000 Hz
-  float frequency = map(mouseX, 0, width, 20, 5000);
+  /*float frequency = map(mouseX, 0, width, 20, 5000);
   // And the vertical mouse position to the width of the band to be passed through
   float bandwidth = map(mouseY, 0, height, 2000, 100);
 
   filter.freq(frequency);
-  filter.bw(bandwidth);
+  filter.bw(bandwidth);*/
   
   // Change stroke color depending on mouse position
   /*if (mouseX > width / 2) {
@@ -150,8 +144,8 @@ public void draw() {
   // Perform the analysis
   waveform.analyze();
   
-  color c = color(random(0, 256), random(0, 256), random(0, 256));
   /*
+  color c = color(random(0, 256), random(0, 256), random(0, 256));
   stroke(c);
   fill(c);*/
   
@@ -173,17 +167,18 @@ public void draw() {
   
   translate(width/2, 0);
   
+  long drawingStart = millis();
+  
+  // Draw lines
   for (int i = 0; i < numLines; i++) {
-    //stroke(c);
-    strokeWeight(2);
+    // Calculate line offset
+    float offset = map(i, 0, numLines, 0, width);
+     
+    // Draw this line
     beginShape();
     for(int j = 0; j < samples; j++){
-      /*vertex(
-        map(j, 0, samples, 0, width),
-        map(waveform.data[j], -0.5, 0.5, 0, height) - height / 2 + map(i, 0, numLines, 0, height)
-      );*/
       vertex(
-        map(waveform.data[j], -0.5, 0.5, 0, width) - width + map(i, 0, numLines, 0, width) + j,// + random(0, 1),
+        map(waveform.data[j], -0.5, 0.5, 0, width) - width + offset + j,// + random(0, 1),
         map(j, 0, samples, 0, height) //+ random(0, 50)
       );
     }
@@ -203,4 +198,8 @@ public void draw() {
     }
     endShape();*/
   }
+  
+  println("drawing lines took: " + (millis() - drawingStart) + "ms");
+  
+  println("Draw loop took: " + (millis() - start) + "ms");
 }
