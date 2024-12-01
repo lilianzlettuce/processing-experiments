@@ -4,7 +4,7 @@ import processing.sound.*;
 Serial port;
 int val;
 float rotationFactor;
-int numLines = 80;
+int numLines = 80; //80
 
 // Declare the sound source and Waveform analyzer variables
 SoundFile sample;
@@ -15,11 +15,12 @@ WhiteNoise noise;
 BandPass filter;
 
 // Define how many samples of the Waveform you want to be able to read at once
-int samples = 70;
+int samples = 80; // 80
+int step = 1; // for downsampling
 
 public void setup() {
   fullScreen();
-  //size(1000, 600);
+  //size(1000, 600, P2D);
   
   // Set background color, noFill and stroke style
   background(0);
@@ -52,12 +53,9 @@ public void setup() {
   rotationFactor = 0.98039216;
   rotationFactor = 0.098;
   
-  // Open the port that the board is connected to and use the same speed (9600 bps)
-  //port = new Serial(this, 9600);  // Comment this line if it's not the correct port
-  
   // List all the available serial ports, preceded by their index number:
   printArray(Serial.list());
-  // Instead of 0 input the index number of the port you are using:
+  // Open port and use the same speed (9600 bps)
   port = new Serial(this, Serial.list()[4], 9600);
 }
 
@@ -66,7 +64,6 @@ public void draw() {
   
   // Reset canvas
   /*background(0);
-  stroke(255);
   strokeWeight(2);
   noFill();*/
   
@@ -74,50 +71,59 @@ public void draw() {
   noCursor();
   
   // Check if data is available
-  if (port.available()> 0) {
+  if (port.available() > 0) {
     // Read a line of text and check if valid
     String lineRead = port.readStringUntil('\n');
-    if (lineRead != null && lineRead.length() > 6) {
+    if (lineRead != null) {
       lineRead = trim(lineRead); // remove whitespace
       
-      // Convert value to integer
-      val = int(lineRead.substring(6));
+      if (lineRead.length() > 6) {
       
-      // Check value ID
-      String id = lineRead.substring(0, 5);
-      switch(id) {
-        case "AVAL0": {
-          // Update number of samples read from waveform
-          /*samples = int(map(val, 0, 255, 10, 120));
-          // Create the Waveform analyzer and connect audio in
-          waveform = new Waveform(this, samples);
-          waveform.input(new AudioIn(this, 0));
-          
-          println("samples" + samples);*/
-          break;
-        }
-        case "AVAL1" : {
-          /*numLines = int(map(val, 0, 255, 1, 100));
-          println("numlines: " + numLines);*/
-          break;
-        }
-        case "AVAL2" : {
-          // ROT
-          rotationFactor = map(val, 0, 255, 0, 1); // potentiometer
-          //rotationFactor = map(val, 0, 20, 0, 1); // light sensor (hacky for now)
-          println("ROT" + rotationFactor);
-          break;
-        }
-        case "AVAL3" : {
-          // RATE
-          // Update speed of sample sound
-          float speed = map(val, 0, 255, 0.1, 3);
-          sample.rate(speed);
-          //println(speed);
-          break;
-        }
-        default : {
-          break;
+        // Convert value to integer
+        val = int(lineRead.substring(6));
+        
+        // Check value ID
+        String id = lineRead.substring(0, 5);
+        switch(id) {
+          case "AVAL0": {
+            
+            break;
+          }
+          case "AVAL1" : {
+            /*numLines = int(map(val, 0, 255, 1, 100));
+            println("numlines: " + numLines);*/
+            
+            // Update number of samples used from waveform
+            step = val / 8 + 1;
+            break;
+          }
+          case "AVAL2" : {
+            if (val > 128) {
+              // Reset canvas
+              background(0);
+              strokeWeight(2);
+              noFill();
+            } else {
+              fill(0);
+            }
+            break;
+          }
+          case "AVAL3" : {
+            // ROT
+            rotationFactor = map(val, 0, 255, 0, 1); // potentiometer
+            //rotationFactor = map(val, 0, 20, 0, 1); // light sensor (hacky for now)
+            println("ROT" + rotationFactor);
+            
+            // RATE
+            // Update speed of sample sound
+            float speed = map(val, 0, 255, 0.1, 3);
+            sample.rate(speed);
+            //println(speed);
+            break;
+          }
+          default : {
+            break;
+          }
         }
       }
     }
@@ -144,59 +150,31 @@ public void draw() {
   // Perform the analysis
   waveform.analyze();
   
-  /*
-  color c = color(random(0, 256), random(0, 256), random(0, 256));
-  stroke(c);
-  fill(c);*/
-  
-  /*beginShape();
-  for(int i = 0; i < samples; i++){
-    // Draw current data of the waveform
-    // Each sample in the data array is between -1 and +1 
-    //stroke(255);
-    /*vertex(
-      map(i, 0, samples, 0, width),
-      map(waveform.data[i], -0.7, 0.7, 0, height)
-    );
-    vertex(
-      map(waveform.data[i], -0.5, 0.5, 0, width),
-      map(i, 0, samples, 0, height)
-    );
-  }
-  endShape();*/
-  
   translate(width/2, 0);
   
   long drawingStart = millis();
   
+  //float lineGap = width / (float)numLines; // gap between each line
+  //float sampleGap = height / (float)samples; // gap between each sample point on a line
+  
   // Draw lines
   for (int i = 0; i < numLines; i++) {
     // Calculate line offset
-    float offset = map(i, 0, numLines, 0, width);
+    float lineOffset = map(i, 0, numLines, 0, width);
+    //float lineOffset = i * lineGap;
      
     // Draw this line
     beginShape();
-    for(int j = 0; j < samples; j++){
+    for(int j = 0; j < samples; j += step){
       vertex(
-        map(waveform.data[j], -0.5, 0.5, 0, width) - width + offset + j,// + random(0, 1),
-        map(j, 0, samples, 0, height) //+ random(0, 50)
+        map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
+        map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
       );
     }
     
     // Rotate around origin
-    //rotate(PI * map(mouseY, 0, height, 0, 1));// / mouseY);
     rotate(PI * rotationFactor);
     endShape();
-    
-    // Add perpendicular set of lines
-    /*beginShape();
-    for(int j = 0; j < samples; j++){
-      vertex(
-        map(j, 0, samples, 0, width),
-        map(waveform.data[j], -0.5, 0.5, 0, height) - height / 2 + map(i, 0, numLines, 0, height)
-      );
-    }
-    endShape();*/
   }
   
   println("drawing lines took: " + (millis() - drawingStart) + "ms");
