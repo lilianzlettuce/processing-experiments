@@ -49,7 +49,7 @@ public void setup() {
   sample3.amp(6);
   
   noise = new WhiteNoise(this);
-  noise.play(0.2);
+  noise.play(0.01);
   
   filter = new BandPass(this);
   filter.process(sample);
@@ -59,8 +59,8 @@ public void setup() {
 
   // Create the Waveform analyzer and connect audio in
   waveform = new Waveform(this, samples);
-  waveform.input(sample2);
-  //waveform.input(new AudioIn(this, 0));
+  //waveform.input(sample2);
+  waveform.input(new AudioIn(this, 0));
   
   // Keeping some cool rotations
   rotationFactor = 0.5058824;
@@ -111,7 +111,6 @@ public void draw() {
               // Adjust heartbeatsound volume
               sample3.amp(map(val, 80, 255, 3, 0));
             }
-            
             
             break;
           }
