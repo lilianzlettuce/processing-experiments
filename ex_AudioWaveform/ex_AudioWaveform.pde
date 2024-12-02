@@ -34,12 +34,18 @@ public void setup() {
   sample = new SoundFile(this, "beat.aiff");
   sample = new SoundFile(this, "heavenly.wav");
   sample2 = new SoundFile(this, "warp_machine.wav");
+  sample2 = new SoundFile(this, "spin.wav");
+  sample2 = new SoundFile(this, "heartbeat.mp3");
+  //sample2 = new SoundFile(this, "rope.mp3");
+  //sample2 = new SoundFile(this, "slowmo.wav");
+  //sample2 = new SoundFile(this, "vinyl.wav");
   //sample.loop();
-  //sample2.loop();
+  sample2.loop();
+  sample2.amp(10);
   //sample2.amp(0.7);
   
   noise = new WhiteNoise(this);
-  //noise.play(0.2);
+  noise.play(0.2);
   
   filter = new BandPass(this);
   filter.process(sample);
@@ -48,7 +54,8 @@ public void setup() {
 
   // Create the Waveform analyzer and connect audio in
   waveform = new Waveform(this, samples);
-  waveform.input(new AudioIn(this, 0));
+  waveform.input(sample2);
+  //waveform.input(new AudioIn(this, 0));
   
   // Keeping some cool rotations
   rotationFactor = 0.5058824;
@@ -63,21 +70,6 @@ public void setup() {
 
 public void draw() {
   long start = millis();
-  
-  /*pushMatrix();
-  translate(130, height/2, 0);
-  rotateY(1.25);
-  rotateX(-0.4);
-  noFill();
-  box(100);
-  popMatrix();
-  
-  pushMatrix();
-  translate(500, height*0.35, -200);
-  noFill();
-  stroke(255);
-  sphere(280);
-  popMatrix();*/
   
   // Hide cursor
   noCursor();
@@ -98,18 +90,21 @@ public void draw() {
         String id = lineRead.substring(0, 5);
         switch(id) {
           case "AVAL0": {
-            if (val < 200) {
-              fill(255, 0, 0);
-              stroke(0);
+            // Adjust fill mode
+            if (val < 80) {
+              // Reset canvas
+              background(0);
+              strokeWeight(2);
+              noFill();
             } else {
+              // Allow layering
               fill(0);
-              stroke(255, 0, 0);
             }
             break;
           }
           case "AVAL1" : {
             // Update number of samples used from waveform
-            step = val / 8 + 1;
+            step = (255 - val) / 8 + 1;
             break;
           }
           case "AVAL2" : {
@@ -133,18 +128,27 @@ public void draw() {
             // Update speed of sample sound
             float speed = map(val, 0, 255, 0.1, 3);
             sample.rate(speed);
+            sample2.rate(speed);
             //println(speed);
             break;
           }
           case "SVAL0" : {
+            // Color inversion
             if (val == 0) {
+              fill(255, 0, 0);
+              stroke(0);
+            } else {
+              fill(0);
+              stroke(255, 0, 0);
+            }
+            /*if (val == 0) {
               // Reset canvas
               background(0);
               strokeWeight(2);
               noFill();
             } else {
               fill(0);
-            }
+            }*/
             break;
           }
           default : {
@@ -157,7 +161,6 @@ public void draw() {
   
   println("Serial reading took: " + (millis() - start) + "ms");
   
-  
   // Map the left/right mouse position to a cutoff frequency between 20 and 10000 Hz
   /*float frequency = map(mouseX, 0, width, 20, 5000);
   // And the vertical mouse position to the width of the band to be passed through
@@ -165,13 +168,6 @@ public void draw() {
 
   filter.freq(frequency);
   filter.bw(bandwidth);*/
-  
-  // Change stroke color depending on mouse position
-  /*if (mouseX > width / 2) {
-    stroke(255, 255, 255);
-  } else {
-    stroke(255, 0, 0);
-  }*/
 
   // Perform the analysis
   waveform.analyze();
@@ -209,6 +205,4 @@ public void draw() {
   }
   
   println("drawing lines took: " + (millis() - drawingStart) + "ms");
-  
-  println("Draw loop took: " + (millis() - start) + "ms");
 }
