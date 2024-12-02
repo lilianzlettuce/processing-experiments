@@ -6,11 +6,12 @@ int val;
 float rotationFactor;
 float rotationFactor2 = 0;
 int translateY = 0;
-int numLines = 80; //80
+int numLines = 80;
 
 // Declare the sound source and Waveform analyzer variables
 SoundFile sample;
 SoundFile sample2;
+SoundFile sample3;
 Waveform waveform;
 
 WhiteNoise noise;
@@ -31,18 +32,21 @@ public void setup() {
   fill(0);
 
   // Load and play a soundfile and loop it.
-  sample = new SoundFile(this, "beat.aiff");
+  /*sample = new SoundFile(this, "beat.aiff");
   sample = new SoundFile(this, "heavenly.wav");
   sample2 = new SoundFile(this, "warp_machine.wav");
-  sample2 = new SoundFile(this, "spin.wav");
-  sample2 = new SoundFile(this, "heartbeat.mp3");
+  sample2 = new SoundFile(this, "spin.wav");*/
+  
+  sample = new SoundFile(this, "SNF.wav");
   //sample2 = new SoundFile(this, "rope.mp3");
   //sample2 = new SoundFile(this, "slowmo.wav");
-  //sample2 = new SoundFile(this, "vinyl.wav");
-  //sample.loop();
+  sample2 = new SoundFile(this, "vinyl.wav");
+  sample3 = new SoundFile(this, "heartbeat.mp3");
+  
+  sample.loop();
   sample2.loop();
-  sample2.amp(10);
-  //sample2.amp(0.7);
+  sample3.loop();
+  sample3.amp(6);
   
   noise = new WhiteNoise(this);
   noise.play(0.2);
@@ -50,6 +54,7 @@ public void setup() {
   filter = new BandPass(this);
   filter.process(sample);
   filter.process(sample2);
+  filter.process(sample3);
   filter.process(noise);
 
   // Create the Waveform analyzer and connect audio in
@@ -96,23 +101,43 @@ public void draw() {
               background(0);
               strokeWeight(2);
               noFill();
+              
+              // Adjust heartbeat sound volume
+              sample3.amp(map(val, 0, 80, 0, 3));
             } else {
               // Allow layering
               fill(0);
+              
+              // Adjust heartbeatsound volume
+              sample3.amp(map(val, 80, 255, 3, 0));
             }
+            
+            
             break;
           }
           case "AVAL1" : {
             // Update number of samples used from waveform
             step = (255 - val) / 8 + 1;
+            
             break;
           }
           case "AVAL2" : {
             // Adjust vertical position
-            if (val > 85) {
+            if (val > 128) {
               translateY = height / 2;
             } else {
               translateY = 0;
+            }
+            
+            // Update machine sounds volume
+            if (val < 128) {
+              // Direct increase
+              sample.amp(map(val, 0, 80, 0, 1));
+              sample2.amp(map(val, 0, 80, 0, 1));
+            } else {
+              // Inverted increase
+              sample.amp(map(val, 0, 80, 1, 0));
+              sample2.amp(map(val, 80, 255, 1, 0));
             }
             
             //rotationFactor2 = map(val, 0, 255, 0.05, 1); // potentiometer
@@ -129,7 +154,7 @@ public void draw() {
             float speed = map(val, 0, 255, 0.1, 3);
             sample.rate(speed);
             sample2.rate(speed);
-            //println(speed);
+            sample3.rate(speed);
             break;
           }
           case "SVAL0" : {
