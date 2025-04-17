@@ -48,6 +48,11 @@ public void setup() {
   sample3.loop();
   sample3.amp(6);
   
+  // Mute sounds
+  sample.amp(0);
+  sample2.amp(0);
+  sample3.amp(0);
+  
   noise = new WhiteNoise(this);
   noise.play(0.01);
   
@@ -70,7 +75,7 @@ public void setup() {
   // List all the available serial ports, preceded by their index number:
   printArray(Serial.list());
   // Open port and use the same speed (9600 bps)
-  port = new Serial(this, Serial.list()[4], 9600);
+  port = new Serial(this, Serial.list()[5], 9600);
 }
 
 public void draw() {
@@ -81,6 +86,7 @@ public void draw() {
   
   // Check if data is available
   if (port.available() > 0) {
+    println("port available");
     // Read a line of text and check if valid
     String lineRead = port.readStringUntil('\n');
     if (lineRead != null) {
