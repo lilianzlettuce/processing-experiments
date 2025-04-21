@@ -2,13 +2,19 @@ import processing.serial.*;
 import processing.sound.*;
 
 Serial port;
-int val;
+int val; // serial reading
+
+// Animation variables
+int numLines = 80;
 float rotationFactor;
 float rotationFactor2 = 0;
 int translateY = 0;
-int numLines = 80;
 
-// Declare the sound source and Waveform analyzer variables
+boolean layerOn = false; // determine if background is refilled between draws
+color fillColor = color(0, 0, 0); 
+color strokeColor = color(255, 0, 0);
+
+// Sound source and Waveform analyzer variables
 SoundFile sample;
 SoundFile sample2;
 SoundFile sample3;
@@ -17,7 +23,7 @@ Waveform waveform;
 WhiteNoise noise;
 BandPass filter;
 
-// Define how many samples of the Waveform you want to be able to read at once
+// Number of samples read from the Waveform 
 int samples = 80; // 80
 int step = 1; // for downsampling
 
@@ -27,9 +33,9 @@ public void setup() {
   
   // Set background color, noFill and stroke style
   background(0);
-  stroke(255, 0, 0);
   strokeWeight(2);
-  fill(0);
+  stroke(strokeColor);
+  fill(fillColor);
 
   // Load and play a soundfile and loop it.
   /*sample = new SoundFile(this, "beat.aiff");
@@ -47,11 +53,6 @@ public void setup() {
   sample2.loop();
   sample3.loop();
   sample3.amp(6);
-  
-  // Mute sounds
-  sample.amp(0);
-  sample2.amp(0);
-  sample3.amp(0);
   
   noise = new WhiteNoise(this);
   noise.play(0.01);
@@ -103,16 +104,14 @@ public void draw() {
           case "AVAL0": {
             // Adjust fill mode
             if (val < 80) {
-              // Reset canvas
-              background(0);
-              strokeWeight(2);
-              noFill();
+              // Turn off layering
+              layerOn = false;
               
               // Adjust heartbeat sound volume
               sample3.amp(map(val, 0, 80, 0, 3));
             } else {
-              // Allow layering
-              fill(0);
+              // Turn on layering
+              layerOn = true;
               
               // Adjust heartbeatsound volume
               sample3.amp(map(val, 80, 255, 3, 0));
@@ -144,6 +143,10 @@ public void draw() {
               sample.amp(map(val, 0, 80, 1, 0));
               sample2.amp(map(val, 80, 255, 1, 0));
             }
+            // Mute sounds temporarily
+            /*sample.amp(0);
+            sample2.amp(0);
+            sample3.amp(0);*/
             
             //rotationFactor2 = map(val, 0, 255, 0.05, 1); // potentiometer
             break;
@@ -151,7 +154,6 @@ public void draw() {
           case "AVAL3" : {
             // ROT
             rotationFactor = map(val, 0, 255, 0.05, 1); // potentiometer
-            //rotationFactor = map(val, 0, 20, 0, 1); // light sensor (hacky for now)
             //println("ROT" + rotationFactor);
             
             // RATE
@@ -165,20 +167,14 @@ public void draw() {
           case "SVAL0" : {
             // Color inversion
             if (val == 0) {
-              fill(255, 0, 0);
-              stroke(0);
+              // Black on red
+              fillColor = color(255, 0, 0);
+              strokeColor = color(0, 0, 0);
             } else {
-              fill(0);
-              stroke(255, 0, 0);
+              // Red on black
+              fillColor = color(0, 0, 0); 
+              strokeColor = color(255, 0, 0);
             }
-            /*if (val == 0) {
-              // Reset canvas
-              background(0);
-              strokeWeight(2);
-              noFill();
-            } else {
-              fill(0);
-            }*/
             break;
           }
           default : {
@@ -199,10 +195,21 @@ public void draw() {
   filter.freq(frequency);
   filter.bw(bandwidth);*/
 
-  // Perform the analysis
+  // Perform input audio waveform analysis
   waveform.analyze();
   
-  // Translate entire drawing
+  /* Animation */
+  
+  // Prepare canvas
+  stroke(strokeColor);
+  fill(fillColor);
+  if (!layerOn) {
+    // Reset canvas
+    background(0);
+    strokeWeight(2);
+  }
+  
+  // Translate entire drawing to screen center
   translate(width/2, translateY);
   //rotate(PI * rotationFactor2);
   
@@ -220,11 +227,41 @@ public void draw() {
     // Draw this line
     beginShape();
     for(int j = 0; j < samples; j += step){
+      // Plot vertex from waveform data
       vertex(
         map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
         map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
         //i
-      );
+       );
+        
+      // Spiky line
+      /*if (j % 2 == 1) {
+        vertex(
+          map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
+          map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
+          //i
+        );
+      } else {
+        vertex(
+          width/2 - width + lineOffset + j,
+          map(j, 0, samples / step, 0, height)
+         );
+      }*/
+      
+      // Another line
+      /*if (j % 2 == 1) {
+        vertex(
+          map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
+          map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
+          //i
+        );
+      } else {
+        //vertex(0, map(j, 0, samples / step, 0, height));
+        vertex(
+          width/2 - width + lineOffset + j,
+          map(j, 0, samples / step, 0, height)
+         );
+      }*/
     }
     
     // Rotate around origin
