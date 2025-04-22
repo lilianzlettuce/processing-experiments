@@ -52,7 +52,7 @@ public void setup() {
   sample.loop();
   sample2.loop();
   sample3.loop();
-  sample3.amp(6);
+  sample3.amp(1.5);
   
   noise = new WhiteNoise(this);
   noise.play(0.01);
@@ -108,13 +108,13 @@ public void draw() {
               layerOn = false;
               
               // Adjust heartbeat sound volume
-              sample3.amp(map(val, 0, 80, 0, 3));
+              //sample3.amp(map(val, 0, 80, 0, 3));
             } else {
               // Turn on layering
               layerOn = true;
               
               // Adjust heartbeatsound volume
-              sample3.amp(map(val, 80, 255, 3, 0));
+              //sample3.amp(map(val, 80, 255, 3, 0));
             }
             
             break;
@@ -157,11 +157,11 @@ public void draw() {
             //println("ROT" + rotationFactor);
             
             // RATE
-            // Update speed of sample sound
+            // Update speed of sound
             float speed = map(val, 0, 255, 0.1, 3);
             sample.rate(speed);
             sample2.rate(speed);
-            sample3.rate(speed);
+            //sample3.rate(speed);
             break;
           }
           case "SVAL0" : {
@@ -176,6 +176,18 @@ public void draw() {
               strokeColor = color(255, 0, 0);
             }
             break;
+          }
+          case "DVAL0" : {
+            // Adjust heartbeat speed based on detected distance
+            
+            // Increase heartrate when closer
+            // RATE
+            // Update speed of heartbeat
+            float speed = map(val, 0, 255, 3, 0.1);
+            sample3.rate(speed);
+            
+            // Adjust volume of heartbeat
+            sample3.amp(map(val, 0, 255, 0, 6));
           }
           default : {
             break;
