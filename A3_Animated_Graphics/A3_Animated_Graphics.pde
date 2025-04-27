@@ -14,14 +14,14 @@ WhiteNoise noise;
 BandPass filter;
 
 // Number of samples read from the Waveform 
-int samples = 800; // 80
+int samples = 80; // 80
 int step = 10; // for downsampling
 
 // Animation variables
 int numLines = 80; //80;
 float rotationFactor;
 float rotationFactor2 = 0;
-int translateY = 0;
+int translateY = height * 4; //0;
 
 boolean layerOn = true; // determine if background is refilled between draws
 color fillColor = color(0, 0, 0); 
@@ -270,13 +270,13 @@ public void draw() {
        );*/
       
       // Circle dots
-      float angle = map(waveform.data[j], -0.5, 0.5, 0, TWO_PI) + map(j, 0, samples, 0, 0.5);
-      float radius = height * 0.8;
+      float angle = map(waveform.data[j], -0.5, 0.5, 0, TWO_PI) + map(j, 0, samples, 0, 1);
+      float radius = height * 0.4 + mouseX; // + (width - mouseX);
       float centerX = width / 2;
       float centerY = height / 2;
       vertex(
           (radius) * cos(angle) + centerX,// + random(0, 1),
-          (radius) * sin(angle) + centerY // j * sampleGap //+ random(0, 50)
+          (radius + 0) * sin(angle) + centerY // j * sampleGap //+ random(0, 50)
       );
       
       // Concentric circles
