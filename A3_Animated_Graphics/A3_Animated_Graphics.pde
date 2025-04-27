@@ -4,16 +4,6 @@ import processing.sound.*;
 Serial port;
 int val; // serial reading
 
-// Animation variables
-int numLines = 80;
-float rotationFactor;
-float rotationFactor2 = 0;
-int translateY = 0;
-
-boolean layerOn = false; // determine if background is refilled between draws
-color fillColor = color(0, 0, 0); 
-color strokeColor = color(255, 0, 0);
-
 // Sound source and Waveform analyzer variables
 SoundFile sample;
 SoundFile sample2;
@@ -24,8 +14,18 @@ WhiteNoise noise;
 BandPass filter;
 
 // Number of samples read from the Waveform 
-int samples = 80; // 80
-int step = 1; // for downsampling
+int samples = 800; // 80
+int step = 10; // for downsampling
+
+// Animation variables
+int numLines = 80; //80;
+float rotationFactor;
+float rotationFactor2 = 0;
+int translateY = 0;
+
+boolean layerOn = true; // determine if background is refilled between draws
+color fillColor = color(0, 0, 0); 
+color strokeColor = color(255, 0, 0);
 
 public void setup() {
   fullScreen();
@@ -240,25 +240,55 @@ public void draw() {
     beginShape();
     for(int j = 0; j < samples; j += step){
       // Plot vertex from waveform data
-      vertex(
+       /*vertex(
         map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
         map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
         //i
-       );
+       );*/
         
       // Spiky line
       /*if (j % 2 == 1) {
+        // Normal plot
         vertex(
           map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
           map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
           //i
         );
       } else {
+        // Random/set spike
         vertex(
-          width/2 - width + lineOffset + j,
+          width/2 - width + lineOffset + j, // + random(0, 1),
           map(j, 0, samples / step, 0, height)
          );
       }*/
+      
+      // TODO: sine wave
+      /*vertex(
+          (map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j),// + random(0, 1),
+          map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
+          //i
+       );*/
+      
+      // Circle dots
+      float angle = map(waveform.data[j], -0.5, 0.5, 0, TWO_PI) + map(j, 0, samples, 0, 0.5);
+      float radius = height * 0.8;
+      float centerX = width / 2;
+      float centerY = height / 2;
+      vertex(
+          (radius) * cos(angle) + centerX,// + random(0, 1),
+          (radius) * sin(angle) + centerY // j * sampleGap //+ random(0, 50)
+      );
+      
+      // Concentric circles
+      /*float angle = map(j, 0, samples / step, 0, TWO_PI);
+      //float radius = height * waveform.data[j];
+      float radius = height / 2 - (i * i / 15) + waveform.data[j] * 1000;//map(waveform.data[j], -0.5, 0.5, 0, 10);
+      float centerX = width / 2;
+      float centerY = height / 2;
+      vertex(
+          (radius) * cos(angle) + centerX,// + random(0, 1),
+          (radius) * sin(angle) + centerY // j * sampleGap //+ random(0, 50)
+      );*/
       
       // Another line
       /*if (j % 2 == 1) {
@@ -268,7 +298,7 @@ public void draw() {
           //i
         );
       } else {
-        //vertex(0, map(j, 0, samples / step, 0, height));
+        vertex(0, map(j, 0, samples / step, 0, height));
         vertex(
           width/2 - width + lineOffset + j,
           map(j, 0, samples / step, 0, height)
@@ -279,7 +309,7 @@ public void draw() {
     // Rotate around origin
     //rotateX(PI * rotationFactor);
     //rotateY(PI * rotationFactor);
-    rotate(PI * rotationFactor);
+    rotate(PI * map(mouseX, 0, width, 0.05, 1));
     endShape();
   }
   
