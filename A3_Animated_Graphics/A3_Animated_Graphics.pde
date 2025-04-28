@@ -15,11 +15,11 @@ BandPass filter;
 
 // Number of samples read from the Waveform 
 int samples = 80; // 80
-int step = 10; // for downsampling
+int step = 1; // for downsampling
 
 // Animation variables
 int numLines = 80; //80;
-float rotationFactor;
+float rotationFactor = 0;
 float rotationFactor2 = 0;
 int translateY = height * 4; //0;
 
@@ -271,17 +271,18 @@ public void draw() {
       
       // Circle dots
       float angle = map(waveform.data[j], -0.5, 0.5, 0, TWO_PI) + map(j, 0, samples, 0, 1);
-      float radius = height * 0.4 + mouseX; // + (width - mouseX);
+      float radius = height * 0.4 + width * rotationFactor;
+      //float radius = height * 0.4 + 0.5 * mouseX; // + (width - mouseX);
+      //float radius = height * 0.8 + mouseX;
       float centerX = width / 2;
       float centerY = height / 2;
       vertex(
           (radius) * cos(angle) + centerX,// + random(0, 1),
-          (radius + 0) * sin(angle) + centerY // j * sampleGap //+ random(0, 50)
+          (radius + j) * sin(angle) + centerY // j * sampleGap //+ random(0, 50)
       );
       
       // Concentric circles
       /*float angle = map(j, 0, samples / step, 0, TWO_PI);
-      //float radius = height * waveform.data[j];
       float radius = height / 2 - (i * i / 15) + waveform.data[j] * 1000;//map(waveform.data[j], -0.5, 0.5, 0, 10);
       float centerX = width / 2;
       float centerY = height / 2;
@@ -309,7 +310,8 @@ public void draw() {
     // Rotate around origin
     //rotateX(PI * rotationFactor);
     //rotateY(PI * rotationFactor);
-    rotate(PI * map(mouseX, 0, width, 0.05, 1));
+    //rotate(PI * map(mouseX, 0, width, 0, 1));
+    rotate(PI * rotationFactor);
     endShape();
   }
   
