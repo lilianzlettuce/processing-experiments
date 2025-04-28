@@ -19,6 +19,7 @@ int step = 1; // for downsampling
 
 // Animation variables
 int numLines = 80; //80;
+int linePattern = 0; // 6 line patterns as created for Rotary Switch 2
 float rotationFactor = 0;
 float rotationFactor2 = 0;
 int translateY = height * 4; //0;
@@ -126,15 +127,29 @@ public void draw() {
             break;
           }
           case "AVAL2" : {
+            // Update line pattern from rotary position
+            linePattern = val / 2;
+            
+            // Update fill mode
+            if (val % 2 == 0) {
+              // Black on red
+              fillColor = color(255, 0, 0);
+              strokeColor = color(0, 0, 0);
+            } else {
+              // Red on black
+              fillColor = color(0, 0, 0); 
+              strokeColor = color(255, 0, 0);
+            }
+            
             // Adjust vertical position
-            if (val > 128) {
+            if (val > 5) {
               translateY = height / 2;
             } else {
               translateY = 0;
             }
             
             // Update machine sounds volume
-            if (val < 128) {
+            if (val < 5) {
               // Direct increase
               sample.amp(map(val, 0, 80, 0, 1));
               sample2.amp(map(val, 0, 80, 0, 1));
@@ -240,71 +255,93 @@ public void draw() {
     beginShape();
     for(int j = 0; j < samples; j += step){
       // Plot vertex from waveform data
-       /*vertex(
-        map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
-        map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
-        //i
-       );*/
+      println(linePattern);
+      switch(linePattern) {
+        case 0: {
+          // Original  
+          vertex(
+            map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
+            map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
+            //i
+          );
+          break;
+        }
+        case 1: {
+          // Circle dots
+          float angle = map(waveform.data[j], -0.5, 0.5, 0, TWO_PI) + map(j, 0, samples, 0, 1);
+          float radius = height * 0.4 + width * rotationFactor;
+          //float radius = height * 0.4 + 0.5 * mouseX; // + (width - mouseX);
+          //float radius = height * 0.8 + mouseX;
+          float centerX = width / 2;
+          float centerY = height / 2;
+          vertex(
+              (radius + j) * cos(angle) + centerX,// + random(0, 1),
+              (radius + j) * sin(angle) + centerY // j * sampleGap //+ random(0, 50)
+          );
+          rotate(0.01 * waveform.data[j]);
+          break;
+        }
+        case 2: {
+          // Concentric circles
+          float angle = map(j, 0, samples / step, 0, TWO_PI);
+          float radius = height / 2 - (i * i / 15) + waveform.data[j] * 1000;//map(waveform.data[j], -0.5, 0.5, 0, 10);
+          float centerX = width / 2;
+          float centerY = height / 2;
+          vertex(
+              (radius) * cos(angle) + centerX,// + random(0, 1),
+              (radius) * sin(angle) + centerY // j * sampleGap //+ random(0, 50)
+          );
+          break;
+        }
+        default: {
+          // Original  
+          vertex(
+            map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
+            map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
+            //i
+          );
+          break;
+        }
         
-      // Spiky line
-      /*if (j % 2 == 1) {
-        // Normal plot
-        vertex(
-          map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
-          map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
-          //i
-        );
-      } else {
-        // Random/set spike
-        vertex(
-          width/2 - width + lineOffset + j, // + random(0, 1),
-          map(j, 0, samples / step, 0, height)
-         );
-      }*/
-      
-      // TODO: sine wave
-      /*vertex(
-          (map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j),// + random(0, 1),
-          map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
-          //i
-       );*/
-      
-      // Circle dots
-      float angle = map(waveform.data[j], -0.5, 0.5, 0, TWO_PI) + map(j, 0, samples, 0, 1);
-      float radius = height * 0.4 + width * rotationFactor;
-      //float radius = height * 0.4 + 0.5 * mouseX; // + (width - mouseX);
-      //float radius = height * 0.8 + mouseX;
-      float centerX = width / 2;
-      float centerY = height / 2;
-      vertex(
-          (radius) * cos(angle) + centerX,// + random(0, 1),
-          (radius + j) * sin(angle) + centerY // j * sampleGap //+ random(0, 50)
-      );
-      
-      // Concentric circles
-      /*float angle = map(j, 0, samples / step, 0, TWO_PI);
-      float radius = height / 2 - (i * i / 15) + waveform.data[j] * 1000;//map(waveform.data[j], -0.5, 0.5, 0, 10);
-      float centerX = width / 2;
-      float centerY = height / 2;
-      vertex(
-          (radius) * cos(angle) + centerX,// + random(0, 1),
-          (radius) * sin(angle) + centerY // j * sampleGap //+ random(0, 50)
-      );*/
-      
-      // Another line
-      /*if (j % 2 == 1) {
-        vertex(
-          map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
-          map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
-          //i
-        );
-      } else {
-        vertex(0, map(j, 0, samples / step, 0, height));
-        vertex(
-          width/2 - width + lineOffset + j,
-          map(j, 0, samples / step, 0, height)
-         );
-      }*/
+        // Another line
+        /*if (j % 2 == 1) {
+          vertex(
+            map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
+            map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
+            //i
+          );
+        } else {
+          vertex(0, map(j, 0, samples / step, 0, height));
+          vertex(
+            width/2 - width + lineOffset + j,
+            map(j, 0, samples / step, 0, height)
+           );
+        }*/
+        
+        
+        // Spiky line
+        /*if (j % 2 == 1) {
+          // Normal plot
+          vertex(
+            map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
+            map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
+            //i
+          );
+        } else {
+          // Random/set spike
+          vertex(
+            width/2 - width + lineOffset + j, // + random(0, 1),
+            map(j, 0, samples / step, 0, height)
+           );
+        }*/
+        
+        // TODO: sine wave
+        /*vertex(
+            (map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j),// + random(0, 1),
+            map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
+            //i
+         );*/
+      }
     }
     
     // Rotate around origin
