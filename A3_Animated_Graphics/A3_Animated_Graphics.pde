@@ -22,6 +22,7 @@ int numLines = 80; //80;
 int linePattern = 0; // 6 line patterns as created for Rotary Switch 2
 float rotationFactor = 0;
 float rotationFactor2 = 0;
+float rotationStart = 0;
 int translateY = height * 4; //0;
 
 boolean layerOn = true; // determine if background is refilled between draws
@@ -104,7 +105,7 @@ public void draw() {
         switch(id) {
           case "AVAL0": {
             // Adjust fill mode
-            if (val < 80) {
+            if (val > 125) {
               // Turn off layering
               layerOn = false;
               
@@ -122,7 +123,8 @@ public void draw() {
           }
           case "AVAL1" : {
             // Update number of samples used from waveform
-            step = (255 - val) / 32 + 1;
+            // Set denominator (4) based on speaker volume and sensitivity (test it)
+            step = (255 - val) / 4 + 1;
             
             break;
           }
@@ -132,26 +134,30 @@ public void draw() {
             
             // Update fill mode
             if (val % 2 == 0) {
+              // Rotation start point
+              rotationStart = 0;
+              
               // Black on red
-              fillColor = color(255, 0, 0);
-              strokeColor = color(0, 0, 0);
+              /*fillColor = color(255, 0, 0);
+              strokeColor = color(0, 0, 0);*/
             } else {
+              // Rotation start point
+              rotationStart = 0.5;
+              
               // Red on black
-              fillColor = color(0, 0, 0); 
-              strokeColor = color(255, 0, 0);
+              /*fillColor = color(0, 0, 0); 
+              strokeColor = color(255, 0, 0);*/
             }
             
-            if (linePattern == 2) step = 1;
-            
             // Adjust vertical position
-            if (val >= 1) {
+            if (val >= 2) {
               translateY = height / 2;
             } else {
               translateY = 0;
             }
             
             // Update machine sounds volume
-            if (val < 5) {
+            /*if (val < 5) {
               // Direct increase
               sample.amp(map(val, 0, 80, 0, 1));
               sample2.amp(map(val, 0, 80, 0, 1));
@@ -159,7 +165,7 @@ public void draw() {
               // Inverted increase
               sample.amp(map(val, 0, 80, 1, 0));
               sample2.amp(map(val, 80, 255, 1, 0));
-            }
+            }*/
             // Mute sounds temporarily
             /*sample.amp(0);
             sample2.amp(0);
@@ -199,11 +205,11 @@ public void draw() {
             // Increase heartrate when closer
             // RATE
             // Update speed of heartbeat
-            float speed = map(val, 0, 255, 3, 0.1);
+            float speed = map(val, 0, 255, 2, 0.01);
             sample3.rate(speed);
             
             // Adjust volume of heartbeat
-            sample3.amp(map(val, 0, 255, 0, 6));
+            sample3.amp(map(val, 0, 255, 1, 15));
           }
           default : {
             break;
@@ -267,9 +273,9 @@ public void draw() {
           break;
         }
         case 1: {
-          // Circle function
+          // Circular function
           float angle = map(waveform.data[j], -0.5, 0.5, 0, TWO_PI) + map(j, 0, samples, 0, 1);
-          float radius = height * 0.4 + width * rotationFactor;
+          float radius = height * 0.4 + 0.4 * width * (rotationFactor - rotationStart);
           //float radius = height * 0.4 + 0.5 * mouseX; // + (width - mouseX);
           //float radius = height * 0.8 + mouseX;
           float centerX = width / 2;
@@ -282,20 +288,37 @@ public void draw() {
           break;
         }
         case 2: {
-          // Hourglass function
-          float angle = map(j, 0, samples / step, 0, TWO_PI);
-          float radius = height / 10 - (i * i / 15) + waveform.data[j] * 1000;
+          // Circular function
+          float angle = map(waveform.data[j], -0.5, 0.5, 0, TWO_PI) + map(j, 0, samples, 0, 1);
+          float radius = 0.4 * width * (rotationFactor - rotationStart);
           float centerX = width / 2;
           float centerY = height / 2;
+          vertex(
+              (radius + j) * cos(angle) + centerX,// + random(0, 1),
+              (radius + j) * sin(angle) + centerY // j * sampleGap //+ random(0, 50)
+          );
+          rotate(0.01 * waveform.data[j]);
+          break;
+          
+          // Original  
+          /*vertex(
+            map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
+            map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
+            //i
+          );
+          break;*/
+        }
+        case 3: {
+          // Hourglass function
+          float angle = map(j, 0, samples, 0, TWO_PI);
+          //float angle = map(waveform.data[j], -0.5, 0.5, 0, TWO_PI) + map(j, 0, samples, 0, 1);
+          float radius = height / 10 - (i * i / 15) + waveform.data[j] * 1000;
+          float centerX = 0;
+          float centerY = 0;
           vertex(
               (radius + j) * cos(3 * angle) + centerX,// + random(0, 1),
               (radius + j) * sin(2 * angle) + centerY // j * sampleGap //+ random(0, 50)
           );
-          //rotate(0.01 * waveform.data[j]);
-          break;
-        }
-        case 3: {
-          // something else
           break;
         }
         case 4: {
@@ -305,8 +328,8 @@ public void draw() {
           float centerX = width / 2;
           float centerY = height / 2;
           vertex(
-              (radius) * cos(angle) + centerX,// + random(0, 1),
-              (radius) * sin(angle) + centerY // j * sampleGap //+ random(0, 50)
+              (radius + j) * cos(angle) + centerX,// + random(0, 1),
+              (radius + j) * sin(angle) + centerY // j * sampleGap //+ random(0, 50)
           );
           break;
         }
@@ -366,7 +389,7 @@ public void draw() {
     //rotateX(PI * rotationFactor);
     //rotateY(PI * rotationFactor);
     //rotate(PI * map(mouseX, 0, width, 0, 1));
-    rotate(PI * rotationFactor);
+    if (linePattern != 3) rotate(PI * (rotationStart + rotationFactor));
     endShape();
   }
   
