@@ -126,6 +126,17 @@ public void draw() {
             // Set denominator (4) based on speaker volume and sensitivity (test it)
             step = (255 - val) / 4 + 1;
             
+            // Update machine sounds volume
+            if (val < 50) {
+              // Direct increase
+              sample2.amp(map(val, 0, 50, 0.5, 1));
+              sample.amp(map(val, 50, 255, 1, 0.5));
+            } else {
+              // Inverted increase
+              sample.amp(map(val, 0, 50, 0.5, 1));
+              sample2.amp(map(val, 50, 255, 1, 0.5));
+            }
+            
             break;
           }
           case "AVAL2" : {
@@ -210,6 +221,17 @@ public void draw() {
             
             // Adjust volume of heartbeat
             sample3.amp(map(val, 0, 255, 1, 15));
+            
+            // Update machine sounds volume
+            /*if (val < 50) {
+              // Direct increase
+              sample.amp(map(val, 0, 50, 0, 1));
+              sample2.amp(map(val, 0, 50, 0, 1));
+            } else {
+              // Inverted increase
+              sample.amp(map(val, 50, 255, 1, 0));
+              sample2.amp(map(val, 50, 255, 1, 0));
+            }*/
           }
           default : {
             break;
@@ -299,31 +321,29 @@ public void draw() {
           );
           rotate(0.01 * waveform.data[j]);
           break;
-          
-          // Original  
-          /*vertex(
-            map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
-            map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
-            //i
-          );
-          break;*/
         }
         case 3: {
           // Hourglass function
           float angle = map(j, 0, samples, 0, TWO_PI);
           //float angle = map(waveform.data[j], -0.5, 0.5, 0, TWO_PI) + map(j, 0, samples, 0, 1);
-          float radius = height / 10 - (i * i / 15) + waveform.data[j] * 1000;
-          float centerX = 0;
-          float centerY = 0;
+          float radius = height / 10 - (i * i / 15) + waveform.data[j] * 1000 + 0.2 * width * (rotationFactor - rotationStart);
           vertex(
-              (radius + j) * cos(3 * angle) + centerX,// + random(0, 1),
-              (radius + j) * sin(2 * angle) + centerY // j * sampleGap //+ random(0, 50)
+              (radius + j) * cos((3 + rotationFactor * 6) * (angle)),
+              (radius + j) * sin(2 * (angle + 0.4 * width * (rotationFactor - rotationStart)))
           );
           break;
         }
         case 4: {
+          // Original (except shifted down)
+          vertex(
+            map(waveform.data[j], -0.5, 0.5, 0, width) - width + lineOffset + j,// + random(0, 1),
+            map(j, 0, samples / step, 0, height) // j * sampleGap //+ random(0, 50)
+            //i
+          );
+          break;
+          
           // Concentric circles
-          float angle = map(j, 0, samples / step, 0, TWO_PI);
+          /*float angle = map(j, 0, samples / step, 0, TWO_PI);
           float radius = height / 2 - (i * i / 15) + waveform.data[j] * 1000;//map(waveform.data[j], -0.5, 0.5, 0, 10);
           float centerX = width / 2;
           float centerY = height / 2;
@@ -331,7 +351,7 @@ public void draw() {
               (radius + j) * cos(angle) + centerX,// + random(0, 1),
               (radius + j) * sin(angle) + centerY // j * sampleGap //+ random(0, 50)
           );
-          break;
+          break;*/
         }
         case 5: {
           // Spiky line
