@@ -7,11 +7,13 @@ int val; // serial reading
 // Sound source and Waveform analyzer variables
 SoundFile sample;
 SoundFile sample2;
-SoundFile sample3;
+SoundFile heartbeat;
 Waveform waveform;
 
 WhiteNoise noise;
 BandPass filter;
+
+boolean soundOn = false;
 
 // Number of samples read from the Waveform 
 int samples = 320; // 80
@@ -33,7 +35,7 @@ public void setup() {
   fullScreen();
   //size(1000, 600, P2D);
   
-  // Set background color, noFill and stroke style
+  // Set background color, fill and stroke style
   background(0);
   strokeWeight(2);
   stroke(strokeColor);
@@ -49,12 +51,14 @@ public void setup() {
   //sample2 = new SoundFile(this, "rope.mp3");
   //sample2 = new SoundFile(this, "slowmo.wav");
   sample2 = new SoundFile(this, "vinyl.wav");
-  sample3 = new SoundFile(this, "heartbeat.mp3");
+  heartbeat = new SoundFile(this, "heartbeat.mp3");
   
   sample.loop();
+  sample.amp(0);
   sample2.loop();
-  sample3.loop();
-  sample3.amp(1.5);
+  sample2.amp(0); // 0.3
+  heartbeat.loop();
+  heartbeat.amp(0); // 1.5
   
   noise = new WhiteNoise(this);
   noise.play(0.01);
@@ -62,13 +66,16 @@ public void setup() {
   filter = new BandPass(this);
   filter.process(sample);
   filter.process(sample2);
-  filter.process(sample3);
+  filter.process(heartbeat);
   filter.process(noise);
 
   // Create the Waveform analyzer and connect audio in
   waveform = new Waveform(this, samples);
-  //waveform.input(sample2);
-  waveform.input(new AudioIn(this, 0));
+  waveform.input(sample);
+  waveform.input(sample2);
+  waveform.input(heartbeat);
+  waveform.input(noise);
+  //waveform.input(new AudioIn(this, 0));
   
   // Keeping some cool rotations
   rotationFactor = 0.5058824;
@@ -103,20 +110,34 @@ public void draw() {
         // Check value ID
         String id = lineRead.substring(0, 5);
         switch(id) {
-          case "AVAL0": {
+          case "LVAL0" : {
+            if (val < 0) {
+              // Sound off
+              soundOn = false;
+              
+              // Mute
+              sample.amp(0);
+              sample2.amp(0);
+            } else {
+              // Sound on
+              soundOn = true;
+            }
+            break;
+          }
+          case "AVAL0" : {
             // Adjust fill mode
             if (val > 125) {
               // Turn off layering
               layerOn = false;
               
               // Adjust heartbeat sound volume
-              //sample3.amp(map(val, 0, 80, 0, 3));
+              //heartbeat.amp(map(val, 0, 80, 0, 3));
             } else {
               // Turn on layering
               layerOn = true;
               
               // Adjust heartbeatsound volume
-              //sample3.amp(map(val, 80, 255, 3, 0));
+              //heartbeat.amp(map(val, 80, 255, 3, 0));
             }
             
             break;
@@ -127,14 +148,17 @@ public void draw() {
             step = (255 - val) / 4 + 1;
             
             // Update machine sounds volume
-            if (val < 50) {
-              // Direct increase
-              sample2.amp(map(val, 0, 50, 0.5, 1));
-              sample.amp(map(val, 50, 255, 1, 0.5));
-            } else {
-              // Inverted increase
-              sample.amp(map(val, 0, 50, 0.5, 1));
-              sample2.amp(map(val, 50, 255, 1, 0.5));
+            if (soundOn) {
+              int peak = 125;
+              if (val < peak) {
+                // Direct increase
+                sample2.amp(map(val, 0, peak, 0, 1));
+                sample.amp(map(val, 0, peak, 1, 0.5));
+              } else {
+                // Inverted increase
+                sample.amp(map(val, peak, 255, 0.5, 1));
+                sample2.amp(map(val, peak, 255, 1, 0));
+              }
             }
             
             break;
@@ -167,21 +191,6 @@ public void draw() {
               translateY = 0;
             }
             
-            // Update machine sounds volume
-            /*if (val < 5) {
-              // Direct increase
-              sample.amp(map(val, 0, 80, 0, 1));
-              sample2.amp(map(val, 0, 80, 0, 1));
-            } else {
-              // Inverted increase
-              sample.amp(map(val, 0, 80, 1, 0));
-              sample2.amp(map(val, 80, 255, 1, 0));
-            }*/
-            // Mute sounds temporarily
-            /*sample.amp(0);
-            sample2.amp(0);
-            sample3.amp(0);*/
-            
             //rotationFactor2 = map(val, 0, 255, 0.05, 1); // potentiometer
             break;
           }
@@ -194,7 +203,7 @@ public void draw() {
             float speed = map(val, 0, 255, 0.1, 3);
             sample.rate(speed);
             sample2.rate(speed);
-            //sample3.rate(speed);
+            //heartbeat.rate(speed);
             break;
           }
           case "SVAL0" : {
@@ -217,21 +226,10 @@ public void draw() {
             // RATE
             // Update speed of heartbeat
             float speed = map(val, 0, 255, 2, 0.01);
-            sample3.rate(speed);
+            heartbeat.rate(speed);
             
             // Adjust volume of heartbeat
-            sample3.amp(map(val, 0, 255, 1, 15));
-            
-            // Update machine sounds volume
-            /*if (val < 50) {
-              // Direct increase
-              sample.amp(map(val, 0, 50, 0, 1));
-              sample2.amp(map(val, 0, 50, 0, 1));
-            } else {
-              // Inverted increase
-              sample.amp(map(val, 50, 255, 1, 0));
-              sample2.amp(map(val, 50, 255, 1, 0));
-            }*/
+            heartbeat.amp(map(val, 0, 255, 1, 15));
           }
           default : {
             break;
