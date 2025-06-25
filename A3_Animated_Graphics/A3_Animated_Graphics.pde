@@ -7,6 +7,7 @@ int val; // serial reading
 // Sound source and Waveform analyzer variables
 SoundFile sample;
 SoundFile sample2;
+SoundFile sample3;
 SoundFile heartbeat;
 Waveform waveform;
 
@@ -49,8 +50,8 @@ public void setup() {
   
   sample = new SoundFile(this, "SNF.wav");
   //sample2 = new SoundFile(this, "rope.mp3");
-  //sample2 = new SoundFile(this, "slowmo.wav");
   sample2 = new SoundFile(this, "vinyl.wav");
+  sample3 = new SoundFile(this, "slowmo.wav");
   heartbeat = new SoundFile(this, "heartbeat.mp3");
   
   sample.loop();
@@ -59,6 +60,8 @@ public void setup() {
   sample2.amp(0); // 0.3
   heartbeat.loop();
   heartbeat.amp(0); // 1.5
+  sample3.loop();
+  sample3.amp(1);
   
   noise = new WhiteNoise(this);
   noise.play(0.01);
@@ -66,6 +69,7 @@ public void setup() {
   filter = new BandPass(this);
   filter.process(sample);
   filter.process(sample2);
+  filter.process(sample3);
   filter.process(heartbeat);
   filter.process(noise);
 
@@ -73,6 +77,7 @@ public void setup() {
   waveform = new Waveform(this, samples);
   waveform.input(sample);
   waveform.input(sample2);
+  waveform.input(sample3);
   waveform.input(heartbeat);
   waveform.input(noise);
   //waveform.input(new AudioIn(this, 0));
@@ -122,6 +127,18 @@ public void draw() {
               // Sound on
               soundOn = true;
             }
+            
+            // Update slomo sound volume
+            sample3.amp(map(val, 0, 255, 1, 0));
+            /*int peak = 100;
+            if (val < peak) {
+              // Direct increase
+              sample3.amp(map(val, 0, peak, 0, 1));
+            } else {
+              // Inverted increase
+              sample3.amp(map(val, peak, 255, 1, 0));
+            }*/
+              
             break;
           }
           case "AVAL0" : {
@@ -147,19 +164,12 @@ public void draw() {
             // Set denominator (4) based on speaker volume and sensitivity (test it)
             step = (255 - val) / 4 + 1;
             
-            // Update machine sounds volume
-            if (soundOn) {
-              int peak = 125;
-              if (val < peak) {
-                // Direct increase
-                sample2.amp(map(val, 0, peak, 0, 1));
-                sample.amp(map(val, 0, peak, 1, 0.5));
-              } else {
-                // Inverted increase
-                sample.amp(map(val, peak, 255, 0.5, 1));
-                sample2.amp(map(val, peak, 255, 1, 0));
-              }
-            }
+            // RATE
+            // Update speed of sound
+            float speed = map(val, 0, 255, 0.1, 3);
+            sample.rate(speed);
+            sample2.rate(speed);
+            sample3.rate(speed);
             
             break;
           }
@@ -191,18 +201,32 @@ public void draw() {
               translateY = 0;
             }
             
-            //rotationFactor2 = map(val, 0, 255, 0.05, 1); // potentiometer
             break;
           }
           case "AVAL3" : {
             // ROT
             rotationFactor = map(val, 0, 255, 0.05, 1); // potentiometer
             
+            // Update machine sounds volume
+            if (soundOn) {
+              int peak = 125;
+              if (val < peak) {
+                // Direct increase
+                sample2.amp(map(val, 0, peak, 0, 1));
+                sample.amp(map(val, 0, peak, 1, 0.5));
+              } else {
+                // Inverted increase
+                sample.amp(map(val, peak, 255, 0.5, 1));
+                sample2.amp(map(val, peak, 255, 1, 0));
+              }
+            }
+            
             // RATE
             // Update speed of sound
-            float speed = map(val, 0, 255, 0.1, 3);
+            /*float speed = map(val, 0, 255, 0.1, 3);
             sample.rate(speed);
             sample2.rate(speed);
+            sample3.rate(speed);*/
             //heartbeat.rate(speed);
             break;
           }
