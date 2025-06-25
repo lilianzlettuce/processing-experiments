@@ -33,7 +33,8 @@ color fillColor = color(0, 0, 0);
 color strokeColor = color(255, 0, 0);
 
 public void setup() {
-  fullScreen();
+  //fullScreen();
+  fullScreen(2);
   //size(1000, 600, P2D);
   
   // Set background color, fill and stroke style
@@ -227,12 +228,12 @@ public void draw() {
               int peak = 125;
               if (val < peak) {
                 // Direct increase
-                sample2.amp(map(val, 0, peak, 0, 1));
+                sample2.amp(map(val, 0, peak, 0.5, 1));
                 sample.amp(map(val, 0, peak, 1, 0.5));
               } else {
                 // Inverted increase
                 sample.amp(map(val, peak, 255, 0.5, 1));
-                sample2.amp(map(val, peak, 255, 1, 0));
+                sample2.amp(map(val, peak, 255, 1, 0.5));
               }
             }
             
@@ -264,11 +265,12 @@ public void draw() {
             // Increase heartrate when closer
             // RATE
             // Update speed of heartbeat
-            float speed = map(val, 0, 255, 2, 0.01);
+            int maxDist = 60;
+            float speed = map(val, 0, maxDist, 2, 0.01);
             heartbeat.rate(speed);
             
             // Adjust volume of heartbeat
-            heartbeat.amp(map(val, 0, 255, 1, 15));
+            heartbeat.amp(map(val, 0, maxDist, 3, 5));
           }
           default : {
             break;
