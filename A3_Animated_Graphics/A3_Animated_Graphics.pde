@@ -162,7 +162,22 @@ public void draw() {
           case "AVAL1" : {
             // Update number of samples used from waveform
             // Set denominator (4) based on speaker volume and sensitivity (test it)
-            step = (255 - val) / 4 + 1;
+            //step = (255 - val) / 4 + 1;
+            
+            // Vary step in repeating cycles
+            int numCycles = 5;
+            int cycleSize = 255 / numCycles; // 51
+            int cycleVal = val % cycleSize;
+            //step = cycleSize - cycleVal;
+            
+            // Convert to oscillating step (increase then decrease)
+            int peak = cycleSize / 2; // 25
+            if (cycleVal < peak) {
+              cycleVal *= 2;
+            } else {
+              cycleVal = (int) map(cycleVal, 25, 50, 50, 0);
+            }
+            step = cycleSize - cycleVal;
             
             // RATE
             // Update speed of sound
